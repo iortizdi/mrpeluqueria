@@ -1,0 +1,29 @@
+<ion-view view-title="Login" name="login-view">
+  <ion-content class="padding">
+
+    <ion-slide-box auto-play="true" does-continue="true" slide-interval="4000">
+      <ion-slide>
+          <img style="width: 100%" src="/img/photo-1.png">
+      </ion-slide>
+      <ion-slide>
+          <img style="width: 100%" src="/img/photo-2.png">
+      </ion-slide>
+      <ion-slide>
+          <img style="width: 100%" src="/img/photo-3.png">
+      </ion-slide>
+    </ion-slide-box>
+
+
+    <div class="list list-inset">
+        <label class="item item-input">
+            <input type="text" placeholder="usuario" ng-model="data.username">
+        </label>
+        <label class="item item-input">
+            <input type="password" placeholder="contraseña" ng-model="data.password">
+        </label>
+    </div>
+    <button class="button button-block button-calm" ng-click="login()">Identificate</button>
+    <button class="button button-block button-calm" ui-sref="signup">Registrate</button>
+
+  </ion-content>
+</ion-view>
