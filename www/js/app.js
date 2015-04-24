@@ -37,7 +37,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
   .state('signup', {
       url: '/signup',
-      templateUrl: 'templates/signup.html'
+      templateUrl: 'templates/signup.html',
+      controller: 'RegisterCtrl'
+  })
+
+  .state('forgot', {
+      url: '/forgot',
+      templateUrl: 'templates/forgot-password.html',
+      controller: 'ForgotPasswordCtrl'
   })
 
   // setup an abstract state for the tabs directive
@@ -91,4 +98,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   // if none of the above states are matched, use this as the fallback
   //$urlRouterProvider.otherwise('/tab/dash');
   $urlRouterProvider.otherwise('/login');
+})
+.run(function ($state, $rootScope) {
+    Parse.initialize('FPTPjJFtlplllZPnVl2mqSA0sdkI0xKhSFMlkPNb', 'lrcyJbbHTgLrY40OdAC9Ztn2U72Gl0575jZYG28d');
+    var currentUser = Parse.User.current();
+    $rootScope.user = null;
+    $rootScope.isLoggedIn = false;
+
+    if (currentUser) {
+        $rootScope.user = currentUser;
+        $rootScope.isLoggedIn = true;
+        $state.go('tab.dash');
+    }
 });
