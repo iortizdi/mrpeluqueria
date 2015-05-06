@@ -1,22 +1,7 @@
 angular.module('starter.controllers', [])
 
 .controller('LoginCtrl', function($scope, $state, $rootScope, $ionicLoading, LoginService, $ionicPopup) {
- /*
-    $scope.data = {};
- 
-    $scope.login = function() {
-        LoginService.loginUser($scope.data.username, $scope.data.password)
-        .success(function(data) {
-            $state.go('tab.dash');
-        })
-        .error(function(data) {
-            var alertPopup = $ionicPopup.alert({
-                title: 'Login failed!',
-                template: 'Please check your credentials!'
-            });
-        });
-    }
-*/
+
     $scope.user = {
         username: null,
         password: null
@@ -25,6 +10,7 @@ angular.module('starter.controllers', [])
     $scope.error = {};
 
     $scope.login = function() {
+
         $scope.loading = $ionicLoading.show({
             content: 'Logging in',
             animation: 'fade-in',
@@ -36,21 +22,40 @@ angular.module('starter.controllers', [])
         var user = $scope.user;
         Parse.User.logIn(('' + user.username).toLowerCase(), user.password, {
             success: function(user) {
-                $ionicLoading.hide();
-                $rootScope.user = user;
-                $rootScope.isLoggedIn = true;
-                $state.go('tab.dash', {
-                    clear: true
-                });
+
+                var verified = user.get("emailVerified");
+                if(!verified){
+                    console.log("Email not verified.");
+                    $ionicLoading.hide();
+                    var alertPopup = $ionicPopup.alert({
+                        title: 'Cuenta no activada',
+                        template: 'Debe activar la cuenta validando el email enviado a la cuenta ' + user.get("email")
+                    });
+
+                }else{
+                    $ionicLoading.hide();
+                    $rootScope.user = user;
+                    $rootScope.isLoggedIn = true;
+                    $state.go('tab.dash', {
+                        clear: true
+                    });
+                }
             },
             error: function(user, err) {
                 $ionicLoading.hide();
                 // The login failed. Check error to see why.
                 if (err.code === 101) {
-                    $scope.error.message = 'Invalid login credentials';
+                    var alertPopup = $ionicPopup.alert({
+                        title: 'Credenciales invalidas',
+                        template: 'Debe introducir un email y una constraseña validos.'
+                    });
+                    //$scope.error.message = 'Invalid login credentials';
                 } else {
-                    $scope.error.message = 'An unexpected error has ' +
-                        'occurred, please try again.';
+                    var alertPopup = $ionicPopup.alert({
+                        title: 'Error inesperado',
+                        template: 'Ha ocurrido un error inesperado, porfavor intentelo de nuevo.'
+                    });                  
+                    //$scope.error.message = 'An unexpected error has occurred, please try again.';
                 }
                 $scope.$apply();
             }
@@ -60,15 +65,14 @@ angular.module('starter.controllers', [])
     $scope.forgot = function() {
         $state.go('forgot');
     };
+
 })
 
-.controller('RegisterCtrl', function($scope, $state, $ionicLoading, $rootScope) {
+.controller('RegisterCtrl', function($scope, $state, $ionicLoading, $rootScope, $ionicPopup) {
     $scope.user = {};
     $scope.error = {};
 
     $scope.signup = function() {
-
-        // TODO: add age verification step
 
         $scope.loading = $ionicLoading.show({
             content: 'Sending',
@@ -82,15 +86,23 @@ angular.module('starter.controllers', [])
         user.set("username", $scope.user.email);
         user.set("password", $scope.user.password);
         user.set("email", $scope.user.email);
+        user.set("role", 1);
 
         user.signUp(null, {
             success: function(user) {
                 $ionicLoading.hide();
                 $rootScope.user = user;
                 $rootScope.isLoggedIn = true;
-                $state.go('tab.dash', {
+                var alertPopup = $ionicPopup.alert({
+                    title: 'Login failed!',
+                    template: 'Hemos enviado un email de verificacion a la cuenta ' 
+                      + user.email + '. La cuenta debe ser validada para poder acceder a la aplicacion'
+                });
+
+                $state.go('login', {
                     clear: true
                 });
+
             },
             error: function(user, error) {
                 $ionicLoading.hide();
@@ -110,7 +122,7 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('ForgotPasswordCtlr', function($scope, $state, $ionicLoading) {
+.controller('ForgotPasswordCtrl', function($scope, $state, $ionicLoading) {
     $scope.user = {};
     $scope.error = {};
     $scope.state = {
@@ -128,7 +140,6 @@ angular.module('starter.controllers', [])
 
         Parse.User.requestPasswordReset($scope.user.email, {
             success: function() {
-                // TODO: show success
                 $ionicLoading.hide();
                 $scope.state.success = true;
                 $scope.$apply();
@@ -152,7 +163,20 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('DashCtrl', function($scope) {})
+.controller('DashCtrl', function($scope, $rootScope) {
+    if (!$rootScope.isLoggedIn) {
+        $state.go('login');
+    }
+    var user = $scope.user;
+    var role = user.get("role");
+    if (role == 1) {
+        console.log("login success, role is 1");
+    } else {
+        console.log("login success, role is " + role);
+    }
+
+
+})
 
 .controller('ChatsCtrl', function($scope, Chats) {
   $scope.chats = Chats.all();
